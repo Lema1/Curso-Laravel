@@ -8,6 +8,7 @@
     <meta name="description" content="Sistema Ventas Laravel Vue Js- IncanatoIT">
     <meta name="author" content="Incanatoit.com">
     <meta name="keyword" content="Sistema ventas Laravel Vue Js, Sistema compras Laravel Vue Js">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="img/favicon.png">
     <title>Sistema Ventas - IncanatoIT</title>
     
@@ -16,6 +17,7 @@
 </head>
 
 <body class="app header-fixed sidebar-fixed aside-menu-fixed aside-menu-hidden">
+    <div id="app">
     <header class="app-header navbar">
         <button class="navbar-toggler mobile-sidebar-toggler d-lg-none mr-auto" type="button">
           <span class="navbar-toggler-icon"></span>
@@ -150,7 +152,7 @@
     </div>
 
     
-
+    </div>
     <footer class="app-footer">
         <span><a href="http://www.incanatoit.com/">IncanatoIT</a> &copy; 2017</span>
         <span class="ml-auto">Desarrollado por <a href="http://www.incanatoit.com/">IncanatoIT</a></span>
@@ -158,6 +160,7 @@
 
     <!-- js compilado -->
     <script src="js/plantilla.js"></script>
+    <script src="js/app.js"></script>
     
 </body>
 
