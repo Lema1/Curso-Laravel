@@ -24,6 +24,7 @@
         "vue-template-compiler": "^2.5.22"
     },
     "dependencies": {
-        "npm-watch": "^0.6.0"
+        "npm-watch": "^0.6.0",
+        "sweetalert2": "^8.0.1"
     }
 }

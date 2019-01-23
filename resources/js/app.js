@@ -27,7 +27,7 @@ Vue.component('categoria', require('./components/Categoria.vue').default);
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
-
+window.swal = require('sweetalert2');
 const app = new Vue({
     el: '#app',
     data :{
