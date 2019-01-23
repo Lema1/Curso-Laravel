@@ -108,14 +108,14 @@
                         <div class="form-group row">
                             <label class="col-md-3 form-control-label" for="email-input">Descripción</label>
                             <div class="col-md-9">
-                                <input type="email" v-model="descripcion" class="form-control" placeholder="Enter Email">
+                                <input type="email" v-model="descripcion" class="form-control" placeholder="Ingrese Descripción">
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @click="cerrarModal()">Cerrar</button>
-                    <button type="button" v-if="tipoAccion==1" class="btn btn-primary">Guardar</button>
+                    <button type="button" v-if="tipoAccion==1" @click="registrarCategoria()" class="btn btn-primary">Guardar</button>
                     <button type="button" v-if="tipoAccion==2" class="btn btn-primary">Actualizar</button>
                 </div>
             </div>
@@ -175,7 +175,19 @@
                 });
             },
             registrarCategoria(){
-                
+                let me = this;
+                axios.post('/categoria/registrar',{
+                    'nombre':this.nombre,
+                    'descripcion': this.descripcion
+                    }).then(function (response) {
+                    // handle success
+                    me.cerrarModal();
+                    me.listarCategoria();
+                })
+                .catch(function (error) {
+                    // handle error
+                    console.log(error);
+                });
             },
             cerrarModal(){
                 this.modal=0;
