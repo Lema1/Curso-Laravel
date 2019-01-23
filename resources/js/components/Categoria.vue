@@ -111,6 +111,13 @@
                                 <input type="email" v-model="descripcion" class="form-control" placeholder="Ingrese Descripción">
                             </div>
                         </div>
+                        <div v-show="errorCategoria" class="form-group row div-error">
+                            <div class="text-center text-error">
+                                <div v-for="error in errorMostrarMsjCategoria" :key="error" v-text="error">
+
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -159,7 +166,9 @@
                 arrayCategoria : [],
                 modal : 0,
                 tituloModal : '',
-                tipoAccion : 0
+                tipoAccion : 0,
+                errorCategoria : 0,
+                errorMostrarMsjCategoria : []
             }
         },
         methods: {
@@ -175,6 +184,10 @@
                 });
             },
             registrarCategoria(){
+                if(this.validarCategoria()){
+                    return;
+                }
+
                 let me = this;
                 axios.post('/categoria/registrar',{
                     'nombre':this.nombre,
@@ -189,11 +202,22 @@
                     console.log(error);
                 });
             },
+            validarCategoria(){
+                this.errorCategoria=0;
+                this.errorMostrarMsjCategoria=[];
+
+                if(!this.nombre){ this.errorMostrarMsjCategoria.push('El nombre no puede estar vacío')};
+                if(this.errorMostrarMsjCategoria.length){ this.errorCategoria=1};
+
+                return this.errorCategoria;
+            },
             cerrarModal(){
                 this.modal=0;
                 this.tituloModal='';
                 this.nombre='';
                 this.descripcion='';
+                this.errorCategoria=0;
+                this.errorMostrarMsjCategoria=[];
 
             },
             abrirModal(modelo, accion, data = []){
@@ -231,5 +255,13 @@
         opacity: 1 !important;
         position: absolute !important;
         background-color: #3c292971 !important;
+    }
+    .div-error{
+        display: flex;
+        justify-content: center;
+    }
+    .text-error{
+        color: red !important;
+        font-weight: bold;
     }
 </style>
