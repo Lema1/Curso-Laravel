@@ -13,8 +13,7 @@ class CategoriaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
+    public function index(Request $request){
         if(!$request->ajax()) return redirect('/');
 
         $buscar = $request->buscar;
@@ -40,8 +39,15 @@ class CategoriaController extends Controller
         ];
     }
 
-    public function store(Request $request)
-    {
+    public function selectCategoria(Request $request){
+        if(!$request->ajax()) return redirect('/');
+        $categorias = Categoria::where('condicion','=','1')
+        ->select('id','nombre')->orderBy('nombre','asc')->get();
+
+        return ['categorias' => $categorias];
+    }
+
+    public function store(Request $request){
         if(!$request->ajax()) return redirect('/');
         $categoria = new Categoria();
         $categoria->nombre = $request->nombre;
@@ -50,8 +56,7 @@ class CategoriaController extends Controller
         $categoria->save();
     }
 
-    public function update(Request $request)
-    {
+    public function update(Request $request){
         if(!$request->ajax()) return redirect('/');
         $categoria = Categoria::findOrFail($request->id);
         $categoria->nombre = $request->nombre;
@@ -60,16 +65,14 @@ class CategoriaController extends Controller
         $categoria->save();
     }
 
-    public function desactivar(Request $request)
-    {
+    public function desactivar(Request $request){
         if(!$request->ajax()) return redirect('/');
         $categoria = Categoria::findOrFail($request->id);
         $categoria->condicion = '0';
         $categoria->save();
     }
 
-    public function activar(Request $request)
-    {
+    public function activar(Request $request){
         if(!$request->ajax()) return redirect('/');
         $categoria = Categoria::findOrFail($request->id);
         $categoria->condicion = '1';

@@ -1907,6 +1907,32 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -1934,7 +1960,8 @@ __webpack_require__.r(__webpack_exports__);
       },
       offset: 3,
       criterio: 'nombre',
-      buscar: ''
+      buscar: '',
+      arrayCategoria: []
     };
   },
   computed: {
@@ -1979,6 +2006,17 @@ __webpack_require__.r(__webpack_exports__);
         var respuesta = response.data;
         me.arrayArticulo = respuesta.articulos.data;
         me.pagination = respuesta.pagination;
+      }).catch(function (error) {
+        // handle error
+        console.log(error);
+      });
+    },
+    selectCategoria: function selectCategoria() {
+      var me = this;
+      var url = '/categoria/selectCategoria';
+      axios.get(url).then(function (response) {
+        var respuesta = response.data;
+        me.arrayCategoria = respuesta.categorias;
       }).catch(function (error) {
         // handle error
         console.log(error);
@@ -2125,13 +2163,13 @@ __webpack_require__.r(__webpack_exports__);
       var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
       switch (modelo) {
-        case "categoria":
+        case "articulo":
           {
             switch (accion) {
               case 'registrar':
                 {
                   this.modal = 1;
-                  this.tituloModal = 'Registrar Categoria';
+                  this.tituloModal = 'Registrar Articulo';
                   this.nombre = '';
                   this.descripcion = '';
                   this.tipoAccion = 1;
@@ -2141,7 +2179,7 @@ __webpack_require__.r(__webpack_exports__);
               case 'actualizar':
                 {
                   this.modal = 1;
-                  this.tituloModal = 'Actualizar Categoria';
+                  this.tituloModal = 'Actualizar Articulo';
                   this.tipoAccion = 2;
                   this.categoria_id = data['id'];
                   this.nombre = data['nombre'];
@@ -2151,6 +2189,8 @@ __webpack_require__.r(__webpack_exports__);
             }
           }
       }
+
+      this.selectCategoria();
     }
   },
   mounted: function mounted() {
@@ -39287,7 +39327,7 @@ __webpack_require__.r(__webpack_exports__);
 /*!*******************************************************!*\
   !*** ./node_modules/sweetalert2/src/staticMethods.js ***!
   \*******************************************************/
-/*! exports provided: isValidParameter, isUpdatableParameter, isDeprecatedParameter, argsToParams, getContainer, getPopup, getTitle, getContent, getImage, getIcons, getCloseButton, getActions, getConfirmButton, getCancelButton, getFooter, getFocusableElements, getValidationMessage, isLoading, isVisible, clickConfirm, clickCancel, fire, mixin, queue, getQueueStep, insertQueueStep, deleteQueueStep, showLoading, enableLoading, getTimerLeft, stopTimer, resumeTimer, toggleTimer, increaseTimer, isTimerRunning */
+/*! exports provided: argsToParams, getContainer, getPopup, getTitle, getContent, getImage, getIcons, getCloseButton, getActions, getConfirmButton, getCancelButton, getFooter, getFocusableElements, getValidationMessage, isLoading, isVisible, clickConfirm, clickCancel, fire, mixin, queue, getQueueStep, insertQueueStep, deleteQueueStep, showLoading, enableLoading, getTimerLeft, stopTimer, resumeTimer, toggleTimer, increaseTimer, isTimerRunning, isValidParameter, isUpdatableParameter, isDeprecatedParameter */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -42063,6 +42103,105 @@ var render = function() {
                           staticClass: "col-md-3 form-control-label",
                           attrs: { for: "text-input" }
                         },
+                        [_vm._v("Categoria")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.idcategoria,
+                                expression: "idcategoria"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.idcategoria = $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              }
+                            }
+                          },
+                          [
+                            _c(
+                              "option",
+                              { attrs: { value: "0", disabled: "" } },
+                              [_vm._v("Seleccione")]
+                            ),
+                            _vm._v(" "),
+                            _vm._l(_vm.arrayCategoria, function(categoria) {
+                              return _c("option", {
+                                key: categoria.id,
+                                domProps: {
+                                  value: categoria.id,
+                                  textContent: _vm._s(categoria.nombre)
+                                }
+                              })
+                            })
+                          ],
+                          2
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Codigo")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.codigo,
+                              expression: "codigo"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            placeholder: "Codigo de Barras"
+                          },
+                          domProps: { value: _vm.codigo },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.codigo = $event.target.value
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
                         [_vm._v("Nombre")]
                       ),
                       _vm._v(" "),
@@ -42079,7 +42218,7 @@ var render = function() {
                           staticClass: "form-control",
                           attrs: {
                             type: "text",
-                            placeholder: "Nombre de categoría"
+                            placeholder: "Nombre de Articulo"
                           },
                           domProps: { value: _vm.nombre },
                           on: {
@@ -42090,11 +42229,77 @@ var render = function() {
                               _vm.nombre = $event.target.value
                             }
                           }
-                        }),
-                        _vm._v(" "),
-                        _c("span", { staticClass: "help-block" }, [
-                          _vm._v("(*) Ingrese el nombre de la categoría")
-                        ])
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Precio de Venta")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.precio_venta,
+                              expression: "precio_venta"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { type: "number", placeholder: "" },
+                          domProps: { value: _vm.precio_venta },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.precio_venta = $event.target.value
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Stock")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.stock,
+                              expression: "stock"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { type: "numbre", placeholder: "" },
+                          domProps: { value: _vm.stock },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.stock = $event.target.value
+                            }
+                          }
+                        })
                       ])
                     ]),
                     _vm._v(" "),
@@ -42143,8 +42348,8 @@ var render = function() {
                           {
                             name: "show",
                             rawName: "v-show",
-                            value: _vm.errorCategoria,
-                            expression: "errorCategoria"
+                            value: _vm.errorArticulo,
+                            expression: "errorArticulo"
                           }
                         ],
                         staticClass: "form-group row div-error"
@@ -42153,7 +42358,7 @@ var render = function() {
                         _c(
                           "div",
                           { staticClass: "text-center text-error" },
-                          _vm._l(_vm.errorMostrarMsjCategoria, function(error) {
+                          _vm._l(_vm.errorMostrarMsjArticulo, function(error) {
                             return _c("div", {
                               key: error,
                               domProps: { textContent: _vm._s(error) }
