@@ -48,12 +48,12 @@
                                     <i class="icon-pencil"></i>
                                 </button> &nbsp;
                                 <template v-if="articulo.condicion">
-                                    <button type="button" class="btn btn-danger btn-sm" @click="desactivarCategoria(articulo.id)">
+                                    <button type="button" class="btn btn-danger btn-sm" @click="desactivarArticulo(articulo.id)">
                                         <i class="icon-trash"></i>
                                     </button>
                                 </template>
                                 <template v-else>
-                                    <button type="button" class="btn btn-info btn-sm" @click="activarCategoria(articulo.id)">
+                                    <button type="button" class="btn btn-info btn-sm" @click="activarArticulo(articulo.id)">
                                         <i class="icon-check"></i>
                                     </button>
                                 </template>
@@ -119,6 +119,8 @@
                             <label class="col-md-3 form-control-label" for="text-input">Codigo</label>
                             <div class="col-md-9">
                                 <input type="text" v-model="codigo" class="form-control" placeholder="Codigo de Barras">
+                                <barcode :value="codigo" :options="{ format: 'EAN-13'}"></barcode>
+                                Generando codigo de barras.
                             </div>
                         </div>
                         <div class="form-group row">
@@ -156,8 +158,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @click="cerrarModal()">Cerrar</button>
-                    <button type="button" v-if="tipoAccion==1" @click="registrarCategoria()" class="btn btn-primary">Guardar</button>
-                    <button type="button" v-if="tipoAccion==2" @click="actualizarCategoria()" class="btn btn-primary">Actualizar</button>
+                    <button type="button" v-if="tipoAccion==1" @click="registrarArticulo()" class="btn btn-primary">Guardar</button>
+                    <button type="button" v-if="tipoAccion==2" @click="actualizarArticulo()" class="btn btn-primary">Actualizar</button>
                 </div>
             </div>
             <!-- /.modal-content -->
@@ -169,6 +171,7 @@
 </template>
 
 <script>
+import VueBarcode from 'vue-barcode';
     export default {
         data() {
             return {
@@ -199,6 +202,9 @@
                 buscar : '',
                 arrayCategoria : []
             }
+        },
+        components: {
+            'barcode': VueBarcode
         },
         computed :{
             isActived: function(){
@@ -262,46 +268,54 @@
                 //envia la peticion para visualizar la daa
                 me.listarArticulo(page,buscar,criterio);
             },
-            registrarCategoria(){
-                if(this.validarCategoria()){
+            registrarArticulo(){
+                if(this.validarArticulo()){
                     return;
                 }
 
                 let me = this;
-                axios.post('/categoria/registrar',{
+                axios.post('/articulo/registrar',{
+                    'idcategoria' : this.idcategoria,
+                    'codigo' : this.codigo,
                     'nombre':this.nombre,
+                    'stock' : this.stock,
+                    'precio_venta' : this.precio_venta,
                     'descripcion': this.descripcion
                     }).then(function (response) {
                     // handle success
                     me.cerrarModal();
-                    me.listarCategoria(1,'','nombre');
+                    me.listarArticulo(1,'','nombre');
                 })
                 .catch(function (error) {
                     // handle error
                     console.log(error);
                 });
             },
-            actualizarCategoria(){
-                if(this.validarCategoria()){
+            actualizarArticulo(){
+                if(this.validarArticulo()){
                     return;
                 }
 
                 let me = this;
-                axios.put('/categoria/actualizar',{
+                axios.put('/articulo/actualizar',{
+                    'idcategoria' : this.idcategoria,
+                    'codigo' : this.codigo,
                     'nombre':this.nombre,
+                    'stock' : this.stock,
+                    'precio_venta' : this.precio_venta,
                     'descripcion': this.descripcion,
-                    'id':this.categoria_id
+                    'id' : this.articulo_id
                     }).then(function (response) {
                     // handle success
                     me.cerrarModal();
-                    me.listarCategoria(1,'','nombre');
+                    me.listarArticulo(1,'','nombre');
                 })
                 .catch(function (error) {
                     // handle error
                     console.log(error);
                 });
             },
-            desactivarCategoria(id){
+            desactivarArticulo(id){
                 const swalWithBootstrapButtons = Swal.mixin({
                 confirmButtonClass: 'btn btn-success',
                 cancelButtonClass: 'btn btn-danger',
@@ -309,7 +323,7 @@
                 })
 
                 swalWithBootstrapButtons.fire({
-                title: '¿Estas seguro de desactivar esta categoria?',
+                title: '¿Estas seguro de desactivar este Articulo?',
                 type: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Aceptar',
@@ -319,15 +333,15 @@
                 if (result.value) {
 
                     let me = this;
-                    axios.put('/categoria/desactivar',{
+                    axios.put('/articulo/desactivar',{
                         'id': id
                         }).then(function (response) {
                         // handle success
-                        me.listarCategoria(1,'','nombre');
+                        me.listarArticulo(1,'','nombre');
 
                         swalWithBootstrapButtons.fire(
                         'Desactivado!',
-                        'La categoria fue desactivada.',
+                        'El articulo fue desactivada.',
                         'success'
                         )
                     })
@@ -341,13 +355,13 @@
                 ) {
                     swalWithBootstrapButtons.fire(
                     'Cancelado',
-                    'La categoria no ha sido desactivada',
+                    'El articulo no ha sido desactivada',
                     'error'
                     )
                 }
                 })
             },
-            activarCategoria(id){
+            activarArticulo(id){
                 const swalWithBootstrapButtons = Swal.mixin({
                 confirmButtonClass: 'btn btn-success',
                 cancelButtonClass: 'btn btn-danger',
@@ -355,7 +369,7 @@
                 })
 
                 swalWithBootstrapButtons.fire({
-                title: '¿Estas seguro de activar esta categoria?',
+                title: '¿Estas seguro de activar este Articulo?',
                 type: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Aceptar',
@@ -365,15 +379,15 @@
                 if (result.value) {
 
                     let me = this;
-                    axios.put('/categoria/activar',{
+                    axios.put('/articulo/activar',{
                         'id': id
                         }).then(function (response) {
                         // handle success
-                        me.listarCategoria(1,'','nombre');
+                        me.listarArticulo(1,'','nombre');
 
                         swalWithBootstrapButtons.fire(
                         'Activado!',
-                        'La categoria fue activada.',
+                        'El articulo fue activado.',
                         'success'
                         )
                     })
@@ -393,22 +407,31 @@
                 }
                 })
             },
-            validarCategoria(){
-                this.errorCategoria=0;
-                this.errorMostrarMsjCategoria=[];
+            validarArticulo(){
+                this.errorArticulo=0;
+                this.errorMostrarMsjArticulo=[];
 
-                if(!this.nombre){ this.errorMostrarMsjCategoria.push('El nombre no puede estar vacío')};
-                if(this.errorMostrarMsjCategoria.length){ this.errorCategoria=1};
+                if(this.idcategoria==0){ this.errorMostrarMsjArticulo.push('Seleccione una categoria')};
+                if(!this.nombre){ this.errorMostrarMsjArticulo.push('El nombre no puede estar vacío')};
+                if(!this.stock){ this.errorMostrarMsjArticulo.push('El stock no puede estar vacio')};
+                if(!this.precio_venta){ this.errorMostrarMsjArticulo.push('El precio no puede estar vacio')};
 
-                return this.errorCategoria;
+                if(this.errorMostrarMsjArticulo.length){ this.errorArticulo=1};
+
+                return this.errorArticulo;
             },
             cerrarModal(){
                 this.modal=0;
                 this.tituloModal='';
+                this.idcategoria=0;
+                this.nombre_categoria='';
+                this.codigo='';
                 this.nombre='';
+                this.precio_venta=0;
+                this.stock=0;
                 this.descripcion='';
-                this.errorCategoria=0;
-                this.errorMostrarMsjCategoria=[];
+                this.errorArticulo=0;
+                this.errorMostrarMsjArticulo=[];
 
             },
             abrirModal(modelo, accion, data = []){
@@ -418,8 +441,13 @@
                             case 'registrar': {
                                 this.modal = 1;
                                 this.tituloModal = 'Registrar Articulo';
-                                this.nombre = '';
-                                this.descripcion = '';
+                                this.idcategoria=0;
+                                this.nombre_categoria='';
+                                this.codigo='';
+                                this.nombre='';
+                                this.precio_venta=0;
+                                this.stock=0;
+                                this.descripcion='';
                                 this.tipoAccion = 1;
                                 break;
                             }
@@ -427,8 +455,12 @@
                                 this.modal=1;
                                 this.tituloModal='Actualizar Articulo';
                                 this.tipoAccion=2;
-                                this.categoria_id=data['id'];
+                                this.articulo_id=data['id'];
+                                this.idcategoria=data['idcategoria'];
+                                this.codigo=data['codigo'];
                                 this.nombre=data['nombre'];
+                                this.precio_venta=data['precio_venta']
+                                this.stock=data['stock'];
                                 this.descripcion=data['descripcion'];
                                 break;
                             }
