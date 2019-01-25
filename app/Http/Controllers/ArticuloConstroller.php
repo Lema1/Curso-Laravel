@@ -8,7 +8,7 @@ use App\Articulo;
 class ArticuloConstroller extends Controller
 {
     public function index(Request $request){
-        //if(!$request->ajax()) return redirect('/');
+        if(!$request->ajax()) return redirect('/');
 
         $buscar = $request->buscar;
         $criterio = $request->criterio;
@@ -63,16 +63,14 @@ class ArticuloConstroller extends Controller
         $articulo->save();
     }
 
-    public function desactivar(Request $request)
-    {
+    public function desactivar(Request $request){
         if(!$request->ajax()) return redirect('/');
         $articulo = Articulo::findOrFail($request->id);
         $articulo->condicion = '0';
         $articulo->save();
     }
 
-    public function activar(Request $request)
-    {
+    public function activar(Request $request){
         if(!$request->ajax()) return redirect('/');
         $articulo = Articulo::findOrFail($request->id);
         $articulo->condicion = '1';
