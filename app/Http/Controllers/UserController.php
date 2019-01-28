@@ -78,7 +78,7 @@ class UserController extends Controller
         try{
             DB::beginTransaction();
             //proveedor a modificar
-            $proveedor = User::findOrFail($request->id);
+            $user = User::findOrFail($request->id);
             //persona a modificar
             $persona = Persona::findOrFail($user->id);
 
