@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\SupportFacadesDB;
-use App\Proveedor;
+use Illuminate\Support\Facades\DB;
 use App\Persona;
+use App\Proveedor;
+
 
 class ProveedorController extends Controller
 {
@@ -61,6 +62,7 @@ class ProveedorController extends Controller
             $proveedor->save();
 
             DB::commit();
+
         }catch(Exception $e){
             DB::rollBack();
         }
@@ -72,9 +74,9 @@ class ProveedorController extends Controller
         try{
             DB::beginTransaction();
             //proveedor a modificar
-            $proveedor = Proveedor::finOrFail($request->id);
+            $proveedor = Proveedor::findOrFail($request->id);
             //persona a modificar
-            $persona = Persona::findOrFaul($proveedor->id);
+            $persona = Persona::findOrFail($proveedor->id);
 
             $persona->nombre = $request->nombre;
             $persona->tipo_documento = $request->tipo_documento;
