@@ -8,4 +8,7 @@ class Persona extends Model
 {
     protected $fillable = ['nombre','tipo_documento','num_documento','direccion','telefono','email'];
     
+    public function proveedor(){
+        return $this->hasOne('App\Proveedor');
+    }
 }
