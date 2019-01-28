@@ -23,11 +23,11 @@ Route::put('/categoria/activar', 'CategoriaController@activar');
 Route::get('/categoria/selectCategoria', 'CategoriaController@selectCategoria');
 
 //Rutas Articulos
-Route::get('/articulo', 'ArticuloConstroller@index');
-Route::post('/articulo/registrar', 'ArticuloConstroller@store');
-Route::put('/articulo/actualizar', 'ArticuloConstroller@update');
-Route::put('/articulo/desactivar', 'ArticuloConstroller@desactivar');
-Route::put('/articulo/activar', 'ArticuloConstroller@activar');
+Route::get('/articulo', 'ArticuloController@index');
+Route::post('/articulo/registrar', 'ArticuloController@store');
+Route::put('/articulo/actualizar', 'ArticuloController@update');
+Route::put('/articulo/desactivar', 'ArticuloController@desactivar');
+Route::put('/articulo/activar', 'ArticuloController@activar');
 
 //Rutas Cliente
 Route::get('/cliente', 'ClienteController@index');
@@ -42,3 +42,10 @@ Route::put('/proveedor/actualizar', 'ProveedorController@update');
 
 //rutas rol
 Route::get('/rol', 'RolController@index');
+
+//Rutas user
+Route::get('/user', 'UserController@index');
+Route::post('/user/registrar', 'UserController@store');
+Route::put('/user/actualizar', 'UserController@update');
+Route::put('/user/desactivar', 'UserController@desactivar');
+Route::put('/user/activar', 'UserController@activar');

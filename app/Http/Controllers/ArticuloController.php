@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Articulo;
 
-class ArticuloConstroller extends Controller
+class ArticuloController extends Controller
 {
     public function index(Request $request){
         if(!$request->ajax()) return redirect('/');
