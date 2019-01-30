@@ -6,9 +6,9 @@
  */
 
 require('./bootstrap');
-
 window.Vue = require('vue');
-
+import Vue from 'vue';
+import vSelect from 'vue-select';
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -27,6 +27,7 @@ Vue.component('proveedor', require('./components/Proveedor.vue').default);
 Vue.component('rol', require('./components/Rol.vue').default);
 Vue.component('user', require('./components/User.vue').default);
 Vue.component('ingreso', require('./components/Ingreso.vue').default);
+Vue.component('v-select', vSelect);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -34,10 +35,12 @@ Vue.component('ingreso', require('./components/Ingreso.vue').default);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+ 
 window.swal = require('sweetalert2');
 
 const app = new Vue({
     el: '#app',
+    
     data :{
         menu : 0
     }
