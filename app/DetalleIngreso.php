@@ -12,7 +12,4 @@ class DetalleIngreso extends Model
     ];
     public $timestamps = false;
 
-    
-
-
 }
