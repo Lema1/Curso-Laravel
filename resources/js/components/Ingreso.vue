@@ -138,7 +138,7 @@
                 <div class="form-group row border">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Articulo</label>
+                            <label>Articulo <span style="color:red" v-show="idarticulo==0">Seleecione</span></label>
                             <div class="form-inline">
                                 <input type="text" class="form-control" v-model="codigo" @keyup.enter="buscarArticulo()" placeholder="Ingrese Articulo">
                                 <button class="btn btn-primary">...</button>
@@ -148,13 +148,13 @@
                     </div>
                     <div class="col-md-2">
                         <div class="form-group">
-                            <label>Precio</label>
+                            <label>Precio <span style="color:red" v-show="precio==0">(Ingrese*)</span></label>
                             <input type="number" value="0" step="any" class="form-control" v-model="precio">
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group">
-                            <label>Cantidad</label>
+                            <label>Cantidad <span style="color:red" v-show="cantidad==0">(Ingrese*)</span></label>
                             <input type="number" value="0" class="form-control" v-model="cantidad">
                         </div>
                     </div>
@@ -180,9 +180,9 @@
                                 </tr>
                             </thead>
                             <tbody v-if="arrayDetalle.length">
-                                <tr v-for="detalle in arrayDetalle" :key="detalle.id">
+                                <tr v-for="(detalle,index) in arrayDetalle" :key="detalle.id">
                                     <td>
-                                        <button type="button" class="btn btn-danger btn-sm">
+                                        <button @click="eliminarDetalle(index)" type="button" class="btn btn-danger btn-sm">
                                             <i class="icon-close"></i>
                                         </button>
                                     </td>
@@ -394,15 +394,46 @@
                 //envia la peticion para visualizar la daa
                 me.listarIngreso(page,buscar,criterio);
             },
+            encuentra(id){
+                var sw=0;
+                for(var i=0;i<this.arrayDetalle.length;i++){
+                    if(this.arrayDetalle[i].idarticulo==id){
+                        sw=true;
+                    }
+                }
+                return sw;
+            },
+            eliminarDetalle(index){
+                let me = this;
+
+                me.arrayDetalle.splice(index,1);
+
+            },
             agregarDetalle(){
                 let me = this;
-                me.arrayDetalle.push({
-                    idarticulo: me.idarticulo,
-                    articulo: me.articulo,
-                    cantidad: me.cantidad,
-                    precio: me.precio
-                })
+                if(me.idarticulo ==0 || me.cantidad==0 || me.precio==0){
 
+                }else{
+                    if(me.encuentra(me.idarticulo)){
+                        Swal.fire(
+                            'Error...',
+                            'Articulo ya agregado',
+                            'error'
+                        )
+                    }else{
+                        me.arrayDetalle.push({
+                        idarticulo: me.idarticulo,
+                        articulo: me.articulo,
+                        cantidad: me.cantidad,
+                        precio: me.precio
+                        });
+                        me.codigo ='';
+                        me.idarticulo=0;
+                        me.articulo='';
+                        me.cantidad=0;
+                        me.precio=0;
+                    }
+                }
             },
             registrarPersona(){
                 if(this.validarPersona()){
