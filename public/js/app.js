@@ -5325,6 +5325,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -5341,7 +5345,7 @@ __webpack_require__.r(__webpack_exports__);
       totalParcial: 0.0,
       arrayVenta: [],
       arrayCliente: [],
-      arraydetalle: [],
+      arrayDetalle: [],
       listado: 1,
       modal: 0,
       tituloModal: '',
@@ -5411,7 +5415,7 @@ __webpack_require__.r(__webpack_exports__);
       var resultado = 0.0;
 
       for (var i = 0; i < this.arrayDetalle.length; i++) {
-        resultado = resultado + this.arrayDetalle[i].precio * this.arrayDetalle[i].cantidad;
+        resultado = resultado + (this.arrayDetalle[i].precio * this.arrayDetalle[i].cantidad - this.arrayDetalle[i].descuento);
       }
 
       return resultado;
@@ -5500,17 +5504,25 @@ __webpack_require__.r(__webpack_exports__);
         if (me.encuentra(me.idarticulo)) {
           Swal.fire('Error...', 'Articulo ya agregado', 'error');
         } else {
-          me.arrayDetalle.push({
-            idarticulo: me.idarticulo,
-            articulo: me.articulo,
-            cantidad: me.cantidad,
-            precio: me.precio
-          });
-          me.codigo = '';
-          me.idarticulo = 0;
-          me.articulo = '';
-          me.cantidad = 0;
-          me.precio = 0;
+          if (me.cantidad > me.stock) {
+            Swal.fire('Error...', 'No hay stock disponible!', 'error');
+          } else {
+            me.arrayDetalle.push({
+              idarticulo: me.idarticulo,
+              articulo: me.articulo,
+              cantidad: me.cantidad,
+              precio: me.precio,
+              descuento: me.descuento,
+              stock: me.stock
+            });
+            me.codigo = '';
+            me.idarticulo = 0;
+            me.articulo = '';
+            me.cantidad = 0;
+            me.precio = 0;
+            me.descuento = 0;
+            me.stock = 0;
+          }
         }
       }
     },
@@ -5525,7 +5537,9 @@ __webpack_require__.r(__webpack_exports__);
           idarticulo: data['id'],
           articulo: data['nombre'],
           cantidad: 1,
-          precio: 1
+          precio: data['precio_venta'],
+          descuento: 0,
+          stock: data['stock']
         });
       }
     },
@@ -5540,14 +5554,14 @@ __webpack_require__.r(__webpack_exports__);
         console.log(error);
       });
     },
-    registrarIngreso: function registrarIngreso() {
-      if (this.validarIngreso()) {
+    registrarVenta: function registrarVenta() {
+      if (this.validarVenta()) {
         return;
       }
 
       var me = this;
-      axios.post('/ingreso/registrar', {
-        'idproveedor': this.idproveedor,
+      axios.post('/venta/registrar', {
+        'idcliente': this.idcliente,
         'tipo_comprobante': this.tipo_comprobante,
         'serie_comprobante': this.serie_comprobante,
         'num_comprobante': this.num_comprobante,
@@ -5556,8 +5570,8 @@ __webpack_require__.r(__webpack_exports__);
         'data': this.arrayDetalle
       }).then(function (response) {
         me.listado = 1;
-        me.listarIngreso(1, '', 'num_comprobante');
-        me.idproveedor = 0;
+        me.listarVenta(1, '', 'num_comprobante');
+        me.idcliente = 0;
         me.tipo_comprobante = 'BOLETA';
         me.serie_comprobante = '';
         me.num_comprobante = '';
@@ -5567,6 +5581,9 @@ __webpack_require__.r(__webpack_exports__);
         me.articulo = '';
         me.cantidad = 0;
         me.precio = 0;
+        me.stock = 0;
+        me.codigo = '';
+        me.descuento = 0;
         me.arrayDetalle = [];
       }).catch(function (error) {
         // handle error
@@ -5599,7 +5616,7 @@ __webpack_require__.r(__webpack_exports__);
         console.log(error);
       });
     },
-    desactivarIngreso: function desactivarIngreso(id) {
+    desactivarVenta: function desactivarVenta(id) {
       var _this = this;
 
       var swalWithBootstrapButtons = Swal.mixin({
@@ -5608,7 +5625,7 @@ __webpack_require__.r(__webpack_exports__);
         buttonsStyling: false
       });
       swalWithBootstrapButtons.fire({
-        title: '¿Estas seguro de anular este Ingreso?',
+        title: '¿Estas seguro de anular esta Venta?',
         type: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Aceptar',
@@ -5617,62 +5634,70 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (result) {
         if (result.value) {
           var me = _this;
-          axios.put('/ingreso/desactivar', {
+          axios.put('/venta/desactivar', {
             'id': id
           }).then(function (response) {
             // handle success
-            me.listarIngreso(1, '', 'num_comprobante');
-            swalWithBootstrapButtons.fire('Anulado!', 'El ingreso ha sido anulado con exito.', 'success');
+            me.listarVenta(1, '', 'num_comprobante');
+            swalWithBootstrapButtons.fire('Anulado!', 'La Venta ha sido anulada con exito.', 'success');
           }).catch(function (error) {
             // handle error
             console.log(error);
           });
         } else if ( // Read more about handling dismissals
         result.dismiss === Swal.DismissReason.cancel) {
-          swalWithBootstrapButtons.fire('Cancelado', 'El ingreso no ha sido anulado', 'error');
+          swalWithBootstrapButtons.fire('Cancelado', 'La Venta no ha sido anulado', 'error');
         }
       });
     },
-    validarIngreso: function validarIngreso() {
-      this.errorIngreso = 0;
-      this.errorMostrarMsjIngreso = [];
+    validarVenta: function validarVenta() {
+      var me = this;
+      me.errorVenta = 0;
+      me.errorMostrarMsjVenta = [];
+      var art;
+      me.arrayDetalle.map(function (x) {
+        if (x.cantidad > x.stock) {
+          art = x.articulo + " Stock insuficiente";
+          me.errorMostrarMsjVenta.push(art);
+        }
+      });
 
-      if (this.idproveedor == 0) {
-        this.errorMostrarMsjIngreso.push('Seleccion un Proveedor');
+      if (me.idcliente == 0) {
+        me.errorMostrarMsjVenta.push('Seleccion un Cliente');
       }
 
       ;
 
-      if (this.tipo_comprobante == 0) {
-        this.errorMostrarMsjIngreso.push('Seleccion el comprobante');
+      if (me.tipo_comprobante == 0) {
+        me.errorMostrarMsjVenta.push('Seleccion el comprobante');
       }
 
       ;
 
-      if (!this.num_comprobante) {
-        this.errorMostrarMsjIngreso.push('Ingrese el numero de comprobante');
+      if (!me.num_comprobante) {
+        me.errorMostrarMsjVenta.push('Ingrese el numero de comprobante');
       }
 
       ;
 
-      if (!this.impuesto) {
-        this.errorMostrarMsjIngreso.push('Ingrese el impuesto de compra');
+      if (!me.impuesto) {
+        me.errorMostrarMsjVenta.push('Ingrese el impuesto de compra');
       }
 
       ;
 
-      if (this.arrayDetalle.length <= 0) {
-        this.errorMostrarMsjIngreso.push('Ingrese detalles');
+      if (me.arrayDetalle.length <= 0) {
+        me.errorMostrarMsjVenta.push('Ingrese detalles');
       }
 
       ;
 
-      if (this.errorMostrarMsjIngreso.length) {
-        this.errorIngreso = 1;
+      if (me.errorMostrarMsjVenta.length) {
+        me.errorVenta = 1;
       }
 
       ;
-      return this.errorPersona;
+      return me.errorVenta;
     },
     mostrarDetalle: function mostrarDetalle() {
       var me = this;
@@ -5692,27 +5717,27 @@ __webpack_require__.r(__webpack_exports__);
     ocultarDetalle: function ocultarDetalle() {
       this.listado = 1;
     },
-    verIngreso: function verIngreso(id) {
+    verVenta: function verVenta(id) {
       var me = this;
       this.listado = 2; //obtener datos del ingreso
 
-      var arrayIngresoT = [];
-      var url = '/ingreso/obtenerCabecera?id=' + id;
+      var arrayVentaT = [];
+      var url = '/venta/obtenerCabecera?id=' + id;
       axios.get(url).then(function (response) {
         var respuesta = response.data;
-        arrayIngresoT = respuesta.ingreso;
-        me.proveedor = arrayIngresoT[0]['nombre'];
-        me.tipo_comprobante = arrayIngresoT[0]['tipo_comprobante'];
-        me.serie_comprobante = arrayIngresoT[0]['serie_comprobante'];
-        me.num_comprobante = arrayIngresoT[0]['num_comprobante'];
-        me.impuesto = arrayIngresoT[0]['impuesto'];
-        me.total = arrayIngresoT[0]['total'];
+        arrayVentaT = respuesta.venta;
+        me.cliente = arrayVentaT[0]['nombre'];
+        me.tipo_comprobante = arrayVentaT[0]['tipo_comprobante'];
+        me.serie_comprobante = arrayVentaT[0]['serie_comprobante'];
+        me.num_comprobante = arrayVentaT[0]['num_comprobante'];
+        me.impuesto = arrayVentaT[0]['impuesto'];
+        me.total = arrayVentaT[0]['total'];
       }).catch(function (error) {
         // handle error
         console.log(error);
       }); //obtener dato de los detalles
 
-      var urld = '/ingreso/obtenerDetalles?id=' + id;
+      var urld = '/venta/obtenerDetalles?id=' + id;
       axios.get(urld).then(function (response) {
         var respuesta = response.data;
         me.arrayDetalle = respuesta.detalles;
@@ -43493,6 +43518,30 @@ var render = function() {
                                         ]),
                                         _vm._v(" "),
                                         _c("td", [
+                                          _c(
+                                            "span",
+                                            {
+                                              directives: [
+                                                {
+                                                  name: "show",
+                                                  rawName: "v-show",
+                                                  value:
+                                                    detalle.cantidad >
+                                                    detalle.stock,
+                                                  expression:
+                                                    "detalle.cantidad>detalle.stock"
+                                                }
+                                              ],
+                                              staticStyle: { color: "red" }
+                                            },
+                                            [
+                                              _vm._v(
+                                                "Stock: " +
+                                                  _vm._s(detalle.stock)
+                                              )
+                                            ]
+                                          ),
+                                          _vm._v(" "),
                                           _c("input", {
                                             directives: [
                                               {
@@ -43523,6 +43572,26 @@ var render = function() {
                                         ]),
                                         _vm._v(" "),
                                         _c("td", [
+                                          _c(
+                                            "span",
+                                            {
+                                              directives: [
+                                                {
+                                                  name: "show",
+                                                  rawName: "v-show",
+                                                  value:
+                                                    detalle.descuento >
+                                                    detalle.precio *
+                                                      detalle.cantidad,
+                                                  expression:
+                                                    "detalle.descuento>detalle.precio*detalle.cantidad"
+                                                }
+                                              ],
+                                              staticStyle: { color: "red" }
+                                            },
+                                            [_vm._v("Descuento Superior")]
+                                          ),
+                                          _vm._v(" "),
                                           _c("input", {
                                             directives: [
                                               {
@@ -43557,7 +43626,8 @@ var render = function() {
                                             " " +
                                               _vm._s(
                                                 detalle.precio *
-                                                  detalle.cantidad
+                                                  detalle.cantidad -
+                                                  detalle.descuento
                                               ) +
                                               " "
                                           )
@@ -43657,11 +43727,11 @@ var render = function() {
                         _c("div", { staticClass: "col-md-9" }, [
                           _c("div", { staticClass: "form-group" }, [
                             _c("label", { attrs: { for: "" } }, [
-                              _vm._v("Proveedor")
+                              _vm._v("Cliente")
                             ]),
                             _vm._v(" "),
                             _c("p", {
-                              domProps: { textContent: _vm._s(_vm.proveedor) }
+                              domProps: { textContent: _vm._s(_vm.cliente) }
                             })
                           ])
                         ]),
@@ -43765,12 +43835,21 @@ var render = function() {
                                               }
                                             }),
                                             _vm._v(" "),
+                                            _c("td", {
+                                              domProps: {
+                                                textContent: _vm._s(
+                                                  detalle.descuento
+                                                )
+                                              }
+                                            }),
+                                            _vm._v(" "),
                                             _c("td", [
                                               _vm._v(
                                                 " " +
                                                   _vm._s(
                                                     detalle.precio *
-                                                      detalle.cantidad
+                                                      detalle.cantidad -
+                                                      detalle.descuento
                                                   ) +
                                                   " "
                                               )
@@ -44240,6 +44319,8 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", [_vm._v("Cantidad")]),
         _vm._v(" "),
+        _c("th", [_vm._v("Descuento")]),
+        _vm._v(" "),
         _c("th", [_vm._v("Sub-Total")])
       ])
     ])
@@ -44248,7 +44329,7 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("td", { attrs: { colspan: "3", align: "right" } }, [
+    return _c("td", { attrs: { colspan: "4", align: "right" } }, [
       _c("strong", [_vm._v("Total Parcial")])
     ])
   },
@@ -44256,7 +44337,7 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("td", { attrs: { colspan: "3", align: "right" } }, [
+    return _c("td", { attrs: { colspan: "4", align: "right" } }, [
       _c("strong", [_vm._v("Total Impuesto")])
     ])
   },
@@ -44264,7 +44345,7 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("td", { attrs: { colspan: "3", align: "right" } }, [
+    return _c("td", { attrs: { colspan: "4", align: "right" } }, [
       _c("strong", [_vm._v("Total Neto")])
     ])
   },
@@ -44273,7 +44354,7 @@ var staticRenderFns = [
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
     return _c("tr", [
-      _c("td", { attrs: { colspan: "4" } }, [
+      _c("td", { attrs: { colspan: "5" } }, [
         _vm._v("No hay articulos agregados")
       ])
     ])

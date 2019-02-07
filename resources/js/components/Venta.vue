@@ -203,12 +203,14 @@
                                         <input v-model="detalle.precio" type="number" class="from-control">
                                     </td>
                                     <td>
+                                        <span style="color:red" v-show="detalle.cantidad>detalle.stock">Stock: {{detalle.stock}}</span>
                                         <input v-model="detalle.cantidad" type="number" class="from-control">
                                     </td>
                                     <td>
+                                        <span style="color:red" v-show="detalle.descuento>detalle.precio*detalle.cantidad">Descuento Superior</span>
                                         <input v-model="detalle.descuento" type="number" class="from-control">
                                     </td>
-                                    <td> {{detalle.precio*detalle.cantidad}} </td>
+                                    <td> {{detalle.precio*detalle.cantidad-detalle.descuento}} </td>
                                 </tr>
                                 <tr style="background-color= #CEECF5">
                                     <td colspan="5" align="right"> <strong>Total Parcial</strong></td>
@@ -246,8 +248,8 @@
                 <div class="form-group row border">
                     <div class="col-md-9">
                         <div class="form-group">
-                            <label for="">Proveedor</label>
-                            <p v-text="proveedor"></p>
+                            <label for="">Cliente</label>
+                            <p v-text="cliente"></p>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -281,6 +283,7 @@
                                     <th>Articulo</th>
                                     <th>Precio</th>
                                     <th>Cantidad</th>
+                                    <th>Descuento</th>
                                     <th>Sub-Total</th>
                                 </tr>
                             </thead>
@@ -289,24 +292,25 @@
                                     <td v-text="detalle.articulo"></td>
                                     <td v-text="detalle.precio"></td>
                                     <td v-text="detalle.cantidad"></td>
-                                    <td> {{detalle.precio*detalle.cantidad}} </td>
+                                    <td v-text="detalle.descuento"></td>
+                                    <td> {{detalle.precio*detalle.cantidad-detalle.descuento}} </td>
                                 </tr>
                                 <tr style="background-color= #CEECF5">
-                                    <td colspan="3" align="right"> <strong>Total Parcial</strong></td>
+                                    <td colspan="4" align="right"> <strong>Total Parcial</strong></td>
                                     <td>$ {{totalParcial=(total-totalImpuesto).toFixed(2)}}</td>
                                 </tr>
                                 <tr style="background-color= #CEECF5">
-                                    <td colspan="3" align="right"> <strong>Total Impuesto</strong></td>
+                                    <td colspan="4" align="right"> <strong>Total Impuesto</strong></td>
                                     <td>$ {{totalImpuesto=((total * impuesto)).toFixed(2)}}</td>
                                 </tr>
                                 <tr style="background-color= #CEECF5">
-                                    <td colspan="3" align="right"> <strong>Total Neto</strong></td>
+                                    <td colspan="4" align="right"> <strong>Total Neto</strong></td>
                                     <td>$ {{total}}</td>
                                 </tr>
                             </tbody>
                             <tbody v-else>
                                 <tr>
-                                    <td colspan="4">No hay articulos agregados</td>
+                                    <td colspan="5">No hay articulos agregados</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -419,7 +423,7 @@
                 totalParcial:0.0,
                 arrayVenta :[],
                 arrayCliente :[],
-                arraydetalle:[],
+                arrayDetalle:[],
                 listado :1,
                 modal : 0,
                 tituloModal : '',
@@ -483,7 +487,7 @@
             calcularTotal: function(){
                 var resultado=0.0;
                 for(var i=0;i<this.arrayDetalle.length;i++){
-                    resultado = resultado + (this.arrayDetalle[i].precio * this.arrayDetalle[i].cantidad)
+                    resultado = resultado + (this.arrayDetalle[i].precio * this.arrayDetalle[i].cantidad-this.arrayDetalle[i].descuento)
                 }
                 return resultado;
 
@@ -581,17 +585,30 @@
                             'error'
                         )
                     }else{
-                        me.arrayDetalle.push({
-                        idarticulo: me.idarticulo,
-                        articulo: me.articulo,
-                        cantidad: me.cantidad,
-                        precio: me.precio
-                        });
-                        me.codigo ='';
-                        me.idarticulo=0;
-                        me.articulo='';
-                        me.cantidad=0;
-                        me.precio=0;
+                        if(me.cantidad>me.stock){
+                            Swal.fire(
+                                'Error...',
+                                'No hay stock disponible!',
+                                'error'
+                            )
+
+                        }else{
+                            me.arrayDetalle.push({
+                            idarticulo: me.idarticulo,
+                            articulo: me.articulo,
+                            cantidad: me.cantidad,
+                            precio: me.precio,
+                            descuento: me.descuento,
+                            stock: me.stock
+                            });
+                            me.codigo ='';
+                            me.idarticulo=0;
+                            me.articulo='';
+                            me.cantidad=0;
+                            me.precio=0;
+                            me.descuento=0;
+                            me.stock=0;
+                        }
                     }
                 }
             },
@@ -608,11 +625,11 @@
                     idarticulo: data['id'],
                     articulo: data['nombre'],
                     cantidad: 1,
-                    precio: 1
+                    precio: data['precio_venta'],
+                    descuento: 0,
+                    stock: data['stock']
                     });
                 }
-
-
             },
             listarArticulo(buscar,criterio){
                 let me = this;
@@ -626,14 +643,14 @@
                     console.log(error);
                 });
             },
-            registrarIngreso(){
-                if(this.validarIngreso()){
+            registrarVenta(){
+                if(this.validarVenta()){
                     return;
                 }
 
                 let me = this;
-                axios.post('/ingreso/registrar',{
-                    'idproveedor':this.idproveedor,
+                axios.post('/venta/registrar',{
+                    'idcliente':this.idcliente,
                     'tipo_comprobante': this.tipo_comprobante,
                     'serie_comprobante': this.serie_comprobante,
                     'num_comprobante': this.num_comprobante,
@@ -643,8 +660,8 @@
 
                     }).then(function (response) {
                     me.listado=1;
-                    me.listarIngreso(1,'','num_comprobante');
-                    me.idproveedor=0;
+                    me.listarVenta(1,'','num_comprobante');
+                    me.idcliente=0;
                     me.tipo_comprobante='BOLETA';
                     me.serie_comprobante='';
                     me.num_comprobante='';
@@ -654,6 +671,9 @@
                     me.articulo='';
                     me.cantidad=0;
                     me.precio=0;
+                    me.stock=0;
+                    me.codigo='';
+                    me.descuento=0;
                     me.arrayDetalle=[];
                 })
                 .catch(function (error) {
@@ -688,7 +708,7 @@
                     console.log(error);
                 });
             },
-            desactivarIngreso(id){
+            desactivarVenta(id){
                 const swalWithBootstrapButtons = Swal.mixin({
                 confirmButtonClass: 'btn btn-success',
                 cancelButtonClass: 'btn btn-danger',
@@ -696,7 +716,7 @@
                 })
 
                 swalWithBootstrapButtons.fire({
-                title: '¿Estas seguro de anular este Ingreso?',
+                title: '¿Estas seguro de anular esta Venta?',
                 type: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Aceptar',
@@ -706,15 +726,15 @@
                 if (result.value) {
 
                     let me = this;
-                    axios.put('/ingreso/desactivar',{
+                    axios.put('/venta/desactivar',{
                         'id': id
                         }).then(function (response) {
                         // handle success
-                        me.listarIngreso(1,'','num_comprobante');
+                        me.listarVenta(1,'','num_comprobante');
 
                         swalWithBootstrapButtons.fire(
                         'Anulado!',
-                        'El ingreso ha sido anulado con exito.',
+                        'La Venta ha sido anulada con exito.',
                         'success'
                         )
                     })
@@ -728,25 +748,35 @@
                 ) {
                     swalWithBootstrapButtons.fire(
                     'Cancelado',
-                    'El ingreso no ha sido anulado',
+                    'La Venta no ha sido anulado',
                     'error'
                     )
                 }
                 })
             },
-            validarIngreso(){
-                this.errorIngreso=0;
-                this.errorMostrarMsjIngreso=[];
+            validarVenta(){
+                let me=this;
+                me.errorVenta=0;
+                me.errorMostrarMsjVenta=[];
+                var art;
 
-                if(this.idproveedor==0){ this.errorMostrarMsjIngreso.push('Seleccion un Proveedor')};
-                if(this.tipo_comprobante==0){ this.errorMostrarMsjIngreso.push('Seleccion el comprobante')};
-                if(!this.num_comprobante){ this.errorMostrarMsjIngreso.push('Ingrese el numero de comprobante')};
-                if(!this.impuesto){ this.errorMostrarMsjIngreso.push('Ingrese el impuesto de compra')};
-                if(this.arrayDetalle.length<=0){ this.errorMostrarMsjIngreso.push('Ingrese detalles')};
+                me.arrayDetalle.map(function(x){
+                    if(x.cantidad>x.stock){
+                        art=x.articulo + " Stock insuficiente";
+                        me.errorMostrarMsjVenta.push(art);
+                    }
+                    
+                });
 
-                if(this.errorMostrarMsjIngreso.length){ this.errorIngreso=1};
+                if(me.idcliente==0){ me.errorMostrarMsjVenta.push('Seleccion un Cliente')};
+                if(me.tipo_comprobante==0){ me.errorMostrarMsjVenta.push('Seleccion el comprobante')};
+                if(!me.num_comprobante){ me.errorMostrarMsjVenta.push('Ingrese el numero de comprobante')};
+                if(!me.impuesto){ me.errorMostrarMsjVenta.push('Ingrese el impuesto de compra')};
+                if(me.arrayDetalle.length<=0){ me.errorMostrarMsjVenta.push('Ingrese detalles')};
 
-                return this.errorPersona;
+                if(me.errorMostrarMsjVenta.length){ me.errorVenta=1};
+
+                return me.errorVenta;
             },
             mostrarDetalle(){
                 let me = this;
@@ -766,30 +796,30 @@
             ocultarDetalle(){
                 this.listado=1;
             },
-            verIngreso(id){
+            verVenta(id){
                 let me = this;
                 this.listado=2;
 
                 //obtener datos del ingreso
-                var arrayIngresoT=[];
-                var url= '/ingreso/obtenerCabecera?id=' + id;
+                var arrayVentaT=[];
+                var url= '/venta/obtenerCabecera?id=' + id;
                 axios.get(url).then(function (response) {
                     var respuesta= response.data;
-                    arrayIngresoT = respuesta.ingreso;
+                    arrayVentaT = respuesta.venta;
                     
-                    me.proveedor = arrayIngresoT[0]['nombre'];
-                    me.tipo_comprobante = arrayIngresoT[0]['tipo_comprobante'];
-                    me.serie_comprobante = arrayIngresoT[0]['serie_comprobante'];
-                    me.num_comprobante = arrayIngresoT[0]['num_comprobante'];
-                    me.impuesto = arrayIngresoT[0]['impuesto'];
-                    me.total = arrayIngresoT[0]['total'];
+                    me.cliente = arrayVentaT[0]['nombre'];
+                    me.tipo_comprobante = arrayVentaT[0]['tipo_comprobante'];
+                    me.serie_comprobante = arrayVentaT[0]['serie_comprobante'];
+                    me.num_comprobante = arrayVentaT[0]['num_comprobante'];
+                    me.impuesto = arrayVentaT[0]['impuesto'];
+                    me.total = arrayVentaT[0]['total'];
                 })
                 .catch(function (error) {
                     // handle error
                     console.log(error);
                 });
                 //obtener dato de los detalles
-                var urld= '/ingreso/obtenerDetalles?id=' + id;
+                var urld= '/venta/obtenerDetalles?id=' + id;
                 axios.get(urld).then(function (response) {
                     var respuesta= response.data;
                     me.arrayDetalle = respuesta.detalles;
