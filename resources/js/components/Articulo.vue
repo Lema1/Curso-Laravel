@@ -12,6 +12,9 @@
                 <button type="button" @click="abrirModal('articulo', 'registrar')" class="btn btn-secondary">
                     <i class="icon-plus"></i>&nbsp;Nuevo
                 </button>
+                <button type="button" @click="cargarPdf()" class="btn btn-info">
+                    <i class="icon-doc"></i>&nbsp;Reporte
+                </button>
             </div>
             <div class="card-body">
                 <div class="form-group row">
@@ -28,6 +31,7 @@
                         <!-- END Buscar -->
                     </div>
                 </div>
+                <!-- Tabla articulos -->
                 <table class="table table-bordered table-striped table-sm">
                     <thead>
                         <tr>
@@ -75,6 +79,7 @@
                         </tr>
                     </tbody>
                 </table>
+                <!-- ENd tabla articulos -->
                 <!-- Paginacion -->
                 <nav>
                     <ul class="pagination">
@@ -248,6 +253,9 @@ import VueBarcode from 'vue-barcode';
                     // handle error
                     console.log(error);
                 });
+            },
+            cargarPdf(){
+                window.open('http://127.0.0.1:8000/articulo/listarPdf','_blank');
             },
             selectCategoria(){
                 let me = this;
