@@ -672,7 +672,7 @@
                     me.serie_comprobante='';
                     me.num_comprobante='';
                     me.impuesto=0.18;
-                    me.total=0.0
+                    me.total=0.0;
                     me.idarticulo=0;
                     me.articulo='';
                     me.cantidad=0;

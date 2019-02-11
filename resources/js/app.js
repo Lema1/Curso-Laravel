@@ -9,6 +9,8 @@ require('./bootstrap');
 window.Vue = require('vue');
 import Vue from 'vue';
 import vSelect from 'vue-select';
+
+
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -29,7 +31,7 @@ Vue.component('user', require('./components/User.vue').default);
 Vue.component('ingreso', require('./components/Ingreso.vue').default);
 Vue.component('venta', require('./components/Venta.vue').default);
 Vue.component('v-select', vSelect);
-
+Vue.component('dashboard', require('./components/Dashboard.vue').default);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
