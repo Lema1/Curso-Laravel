@@ -57,7 +57,6 @@
             </li>
         </ul>
     </header>
-
     <div class="app-body">
     <!-- Side Bar -->
         @if(Auth::check())
