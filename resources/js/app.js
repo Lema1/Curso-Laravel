@@ -32,6 +32,8 @@ Vue.component('ingreso', require('./components/Ingreso.vue').default);
 Vue.component('venta', require('./components/Venta.vue').default);
 Vue.component('v-select', vSelect);
 Vue.component('dashboard', require('./components/Dashboard.vue').default);
+Vue.component('consultaingreso', require('./components/ConsultaIngreso.vue').default);
+Vue.component('consultaventa', require('./components/ConsultaVenta.vue').default);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
